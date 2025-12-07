@@ -1,60 +1,24 @@
-Esperanto Gibberish ASR: Optimizing Low-Resource Speech Recognition
+🎙️ Esperanto Gibberish ASR: Low-Resource Optimization
 
-📌 Project Overview:
+cv-highlight: Achieved state-of-the-art results (WER < 0.19) on a phonetically consistent but semantically meaningless dataset by fine-tuning a 1-Billion parameter model on a single consumer RTX 3080 (10GB).
 
-This project implements a robust Automatic Speech Recognition (ASR) system fine-tuned to transcribe "Esperanto Gibberish"—a dataset characterized by phonetically consistent but semantically meaningless speech.
+📌 Project Overview
 
-The core challenge was training a high-performance model on limited hardware (single RTX 3080 10GB) while overcoming significant acoustic generalization hurdles. The final model achieves a Word Error Rate (WER) of <0.19, achieved through iterative architecture switching, aggressive data augmentation, and memory optimization techniques.
+This project implements a robust Automatic Speech Recognition (ASR) system tailored for "Esperanto Gibberish"—a dataset characterized by strict phonetic consistency without semantic meaning.
 
-Key Technical Achievements
-
-Resource-Constrained Training: Successfully fine-tuned the 1-Billion parameter wav2vec2-xls-r-1b model on a 10GB GPU using LoRA (Low-Rank Adaptation) and Gradient Checkpointing.
-
-Plateau Breaking: Overcame a stubborn WER plateau at 0.30 by switching base models and implementing a custom audiomentations pipeline.
-
-Custom Tokenizer: Built a dynamic character-level vocabulary extractor to handle the specific phonetic distribution of the dataset.
-
-Architecture & Methodology:
-
-1. Model Selection
-
-We experimented with two primary architectures:
-
-Baseline: facebook/wav2vec2-large-xlsr-53 (300M params).
-
-Final Production: facebook/wav2vec2-xls-r-1b (1B params). The 1B model provided the necessary acoustic resolution to distinguish gibberish phonemes without reliance on a language model.
-
-2. Memory Optimization (The 10GB Constraint)
-
-To fit the 1B model into VRAM, the following optimizations were implemented:
-
-LoRA (Low-Rank Adaptation): Trained only adapter layers (Rank 128, Alpha 256) instead of full fine-tuning.
-
-Gradient Checkpointing: Traded compute for memory to reduce activation footprint.
-
-Batch Size = 1 with Gradient Accumulation = 16: Simulated a batch size of 16 to stabilize CTC loss gradients without OOM errors.
-
-3. Data Augmentation Pipeline
-
-To generalize beyond the limited training samples, a custom pipeline was injected into the Dataset class:
-
-Time Stretch: Randomly speeding up/slowing down speech (0.85x - 1.15x).
-
-Pitch Shift: Simulating different vocal tract lengths (+/- 2 semitones).
-
-Gaussian Noise: Improving robustness against silence/background artifacts.
-
-SpecAugment: Aggressive time/feature masking during the forward pass.
+The core engineering challenge was training a massive model (Wav2Vec2-XLS-R-1B) on highly constrained hardware. Through iterative architecture switching, Low-Rank Adaptation (LoRA), and a custom augmentation pipeline, the system overcame acoustic generalization hurdles where standard models failed.
 
 📉 Performance Evolution
 
-Experiment Phase
+We adopted an iterative engineering approach to break through performance plateaus.
+
+Phase
 
 Model Architecture
 
 Strategy
 
-Best WER
+WER (Word Error Rate)
 
 Phase 1
 
@@ -86,7 +50,59 @@ XLS-R (1B)
 
 LoRA (Rank 128) + Augmentation
 
-< 0.19
+< 0.19 🏆
+
+🛠️ Methodology & Architecture
+
+1. Model Selection Strategy
+
+We experimented with two primary architectures:
+
+Baseline: facebook/wav2vec2-large-xlsr-53 (300M params).
+
+Final Production: facebook/wav2vec2-xls-r-1b (1B params).
+
+Insight: The 1B model provided the necessary acoustic resolution to distinguish gibberish phonemes purely on sound, reducing reliance on linguistic probability.
+
+2. Memory Optimization (The 10GB Constraint)
+
+Fitting a 1B parameter model into a 10GB RTX 3080 required strict optimization:
+
+LoRA (Low-Rank Adaptation): Trained only adapter layers (Rank 128, Alpha 256) rather than updating all model weights.
+
+Gradient Checkpointing: Traded compute speed for memory by not caching intermediate activations.
+
+Gradient Accumulation: Used a physical batch size of 1 with accumulation steps of 16 to simulate a batch size of 16, stabilizing CTC loss gradients without OOM errors.
+
+3. Data Augmentation Pipeline
+
+To generalize beyond limited training samples, we injected a custom audiomentations pipeline:
+
+Time Stretch: Randomly speeding up/slowing down speech (0.85x - 1.15x).
+
+Pitch Shift: Simulating different vocal tract lengths (+/- 2 semitones).
+
+SpecAugment: Aggressive time/feature masking during the forward pass.
+
+Gaussian Noise: Improved robustness against silence artifacts.
+
+🧠 Engineering Insights & Challenges
+
+🚫 The "No-Language-Model" Approach
+
+Standard N-gram Language Models (KenLM) actually harmed performance.
+
+Reason: LMs attempt to map phonetic outputs to valid dictionary words. Since our target was "Gibberish," the LM aggressively "corrected" valid gibberish into incorrect real words.
+
+Solution: We relied on pure acoustic decoding (Greedy Search) supported by the high-capacity 1B model.
+
+📉 Scheduler Impact
+
+Switching from a standard Linear Decay to a Cosine Scheduler was crucial for the final "polishing" phase, squeezing out the final 2% accuracy improvement.
+
+🧱 Custom Tokenization
+
+Built a dynamic character-level vocabulary extractor to handle the specific phonetic distribution of the dataset, rather than using a pre-trained tokenizer.
 
 💻 Installation & Usage
 
@@ -112,9 +128,9 @@ transcription = transcribe_file("path/to/audio.wav", model, processor, vocab)
 print(f"Transcription: {transcription}")
 
 
-Training
+Training Reproduction
 
-To reproduce the training results:
+To reproduce the training results using the optimized pipeline:
 
 python train_1b_optimized.py
 
@@ -130,14 +146,6 @@ python train_1b_optimized.py
 │   └── dev.csv
 └── xlsr_1b_gibberish_best/  # Saved LoRA Adapters
 
-
-Challenges:
-
-Language Models & Gibberish: Standard N-gram Language Models harmed performance because they tried to "correct" valid gibberish into real words. Pure acoustic decoding (Greedy) proved superior.
-
-Scheduler Impact: Switching from Linear Decay to a Cosine Scheduler was crucial for squeezing out the final 2% accuracy improvement during the "polishing" phase.
-
-The 3080 Limit: Training 1B models on consumer hardware is viable but requires strict adherence to batch_size=1 and aggressive gradient accumulation.
 
 📜 License
 
