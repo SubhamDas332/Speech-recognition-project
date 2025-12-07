@@ -16,8 +16,8 @@ We adopted an iterative engineering approach to break through performance platea
 | :---- | :---- | :---- | :---- |
 | **Phase 1** | XLS-R (300M) | Full Fine-Tuning | 0.35 |
 | **Phase 2** | XLS-R (300M) | LoRA (Rank 64\) \+ Linear Sched | 0.29 |
-| **Phase 3** | XLS-R (1B) | LoRA (Rank 64\) \+ Grad Accum | 0.22 |
-| **Phase 4** | **XLS-R (1B)** | **LoRA (Rank 128\) \+ Augmentation** | **\< 0.19 🏆** |
+| **Phase 3** | XLS-R (1B) | LoRA (Rank 64\) \+ Grad Accum \+ Greedy decoder| 0.22 |
+| **Phase 4** | **XLS-R (1B)** | **LoRA (Rank 128\) \+ Augmentation** \+ 4 gram decoder| **\< 0.19 🏆** |
 
 ## **🛠️ Methodology & Architecture**
 
@@ -48,12 +48,10 @@ To generalize beyond limited training samples, we injected a custom audiomentati
 
 ## **Insights & Challenges**
 
-### **🚫 The "No-Language-Model" Approach**
-
-Standard N-gram Language Models (KenLM) actually **harmed** performance.
-
-* *Reason:* LMs attempt to map phonetic outputs to valid dictionary words. Since our target was "Gibberish," the LM aggressively "corrected" valid gibberish into incorrect real words.  
-* *Solution:* We relied on pure acoustic decoding (Greedy Search) supported by the high-capacity 1B model.
+### ** Approaches so far**
+* We initially relied on pure acoustic decoding (Greedy Search) supported by the high-capacity 1B model
+* Realized that this harms performance as greedy decoder cannot distinguish between words like "cat" and "kat" where one is a valid word.
+* Thus we implemented N-gram Language Models (KenLM) with BeamSearch. WER performance dropper from 0.25 to 0.19
 
 ### **📉 Scheduler Impact**
 
