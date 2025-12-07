@@ -1,6 +1,6 @@
 # **🎙️ Esperanto Gibberish ASR: Low-Resource Optimization**
 
-**cv-highlight**: Achieved state-of-the-art results (WER \< 0.19) on a phonetically consistent but semantically meaningless dataset by fine-tuning a **1-Billion parameter model** on a single consumer **RTX 3080 (10GB)**.
+ Achieved good results (WER \< 0.19) on a phonetically consistent but semantically meaningless dataset by fine-tuning a **1-Billion parameter model** on a single consumer **RTX 3080 (10GB)**.
 
 ## **📌 Project Overview**
 
