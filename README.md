@@ -66,13 +66,13 @@ Built a dynamic character-level vocabulary extractor to handle the specific phon
 ## **💻 Installation & Usage**
 
 ### **Prerequisites**
-
+```bash
 pip install torch torchaudio transformers peft pandas jiwer audiomentations
-
+```
 ### **Inference**
 
 To transcribe new audio files using the saved LoRA adapters:
-
+```bash
 from inference import transcribe\_file, load\_model
 
 \# Load 1B model with trained adapters  
@@ -84,13 +84,13 @@ model, processor, vocab \= load\_model(
 
 transcription \= transcribe\_file("path/to/audio.wav", model, processor, vocab)  
 print(f"Transcription: {transcription}")
-
+```
 ### **Training Reproduction**
 
 To reproduce the training results using the optimized pipeline:
-
+```bash
 python train\_1b\_optimized.py
-
+```
 ## **📂 Repository Structure**
 
 .  
