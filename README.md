@@ -1,14 +1,14 @@
-# **🎙️ Esperanto Gibberish ASR: Low-Resource Optimization**
+# ** Esperanto Gibberish ASR: Low-Resource Optimization**
 
  Achieved good results (WER \< 0.19) on a phonetically consistent but semantically meaningless dataset by fine-tuning a **1-Billion parameter model** on a single consumer **RTX 3080 (10GB)**.
 
-## **📌 Project Overview**
+## ** Project Overview**
 
 This project implements a robust Automatic Speech Recognition (ASR) system tailored for "Esperanto Gibberish"—a dataset characterized by strict phonetic consistency without semantic meaning.
 
 The core engineering challenge was training a massive model (Wav2Vec2-XLS-R-1B) on highly constrained hardware. Through iterative architecture switching, Low-Rank Adaptation (LoRA), and a custom augmentation pipeline, the system overcame acoustic generalization hurdles where standard models failed.
 
-## **📉 Performance Evolution**
+## **Performance Evolution**
 
 We adopted an iterative engineering approach to break through performance plateaus.
 
@@ -19,7 +19,7 @@ We adopted an iterative engineering approach to break through performance platea
 | **Phase 3** | XLS-R (1B) | LoRA (Rank 64\) \+ Grad Accum \+ Greedy decoder| 0.22 |
 | **Phase 4** | **XLS-R (1B)** | **LoRA (Rank 128\) \+ Augmentation** \+ 4 gram decoder| **\< 0.19 🏆** |
 
-## **🛠️ Methodology & Architecture**
+## ** Methodology & Architecture**
 
 ### **1\. Model Selection Strategy**
 
@@ -53,15 +53,15 @@ To generalize beyond limited training samples, we injected a custom audiomentati
 * Realized that this harms performance as greedy decoder cannot distinguish between words like "cat" and "kat" where one is a valid word.
 * Thus we implemented N-gram Language Models (KenLM) with BeamSearch. WER performance dropper from 0.25 to 0.19
 
-### **📉 Scheduler Impact**
+### ** Scheduler Impact**
 
 Switching from a standard Linear Decay to a **Cosine Scheduler** was crucial for the final "polishing" phase, squeezing out the final 2% accuracy improvement.
 
-### **🧱 Custom Tokenization**
+### ** Custom Tokenization**
 
 Built a dynamic character-level vocabulary extractor to handle the specific phonetic distribution of the dataset, rather than using a pre-trained tokenizer.
 
-## **💻 Installation & Usage**
+## ** Installation & Usage**
 
 ### **Prerequisites**
 ```bash
@@ -89,7 +89,7 @@ To reproduce the training results using the optimized pipeline:
 ```bash
 python train\_1b\_optimized.py
 ```
-## **📂 Repository Structure**
+## ** Repository Structure**
 
 .  
 ├── train\_1b\_optimized.py    \# Main training loop with Augmentation & LoRA  
@@ -100,6 +100,6 @@ python train\_1b\_optimized.py
 │   └── dev.csv  
 └── xlsr\_1b\_gibberish\_best/  \# Saved LoRA Adapters
 
-## **📜 License**
+## ** License**
 
 This project is licensed under the MIT License.
